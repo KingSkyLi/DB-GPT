@@ -37,13 +37,10 @@ class DBSummaryClient:
         self.embeddings = embedding_factory.create(
             model_name=EMBEDDING_MODEL_CONFIG[CFG.EMBEDDING_MODEL]
         )
-
+    
     def db_summary_embedding(self, dbname, db_type):
         """Put db profile and table profile summary into vector store."""
-        if db_type=='tugraph':
-            db_summary_client = GdbmsSummary(dbname, db_type)
-        else:
-            db_summary_client = RdbmsSummary(dbname, db_type)
+        db_summary_client = self.create_summary_client(dbname, db_type)
 
         self.init_db_profile(db_summary_client, dbname)
 
@@ -111,3 +108,10 @@ class DBSummaryClient:
         else:
             logger.info(f"Vector store name {vector_store_name} exist")
         logger.info("initialize db summary profile success...")
+
+    @staticmethod
+    def create_summary_client(dbname: str, db_type: str):
+        if 'graph' in db_type:
+            return GdbmsSummary(dbname, db_type)
+        else:
+            return RdbmsSummary(dbname, db_type)
